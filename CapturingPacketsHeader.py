@@ -7,14 +7,22 @@ def main():
 
     while True:
         (header, payload) = cap.next()
-        l2hdr = payload[:14]
+        ethernet_header = payload[:14]  # byte 0 -14
 
-        print(l2hdr)
-        l2data = struct.unpack("!6s6sH", l2hdr)
+        src_mac = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (
+            ethernet_header[0], ethernet_header[1], ethernet_header[2], ethernet_header[3], ethernet_header[4], ethernet_header[5])
+        dest_mac = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (
+            ethernet_header[6], ethernet_header[7], ethernet_header[8], ethernet_header[9], ethernet_header[10],
+            ethernet_header[11])
 
-        src_mac = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(l2hdr[0]), ord(l2hdr[1]), ord(l2hdr[2]), ord(l2hdr[3]), ord(l2hdr[4]), ord(l2hdr[5]))
-        dest_mac = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(l2hdr[6]), ord(l2hdr[7]), ord(l2hdr[8]), ord(l2hdr[9]), ord(l2hdr[10]), ord(l2hdr[11]))
         print("Source MAC: {} Destination MAC: {}".format(src_mac, dest_mac))
+
+        ip_header = struct.unpack('!BBHHHBBH4s4s', payload[14:34]) # IP header is 20 bytes long
+        time_to_live = ip_header[5]
+        protocol = ip_header[6]
+
+        print("Protocol {} Time To Live {}".format(protocol, time_to_live))
+
 
 if __name__ == '__main__':
     main()
